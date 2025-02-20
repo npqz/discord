@@ -1,2 +1,4 @@
+flask
 pyautogui
 requests
+gunicorn
